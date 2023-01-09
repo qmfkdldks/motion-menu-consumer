@@ -5,13 +5,17 @@
     removeProductLike,
   } from "../services/like_service";
   import type { IProduct } from "src/api/products";
-  import { user } from "../stores/user"
+  import { user } from "../stores/user";
+  import type { CompanySlug } from "src/api/company";
 
+  export let company_id: CompanySlug;
   export let product: IProduct;
-  
+  export let show_media: boolean;
+
   let { id, name, description, price, images, likes_count } = product;
-  let image_public_id: IProduct["images"][0]["public_id"] = images[0]?.public_id;
-  let isLiked:boolean = $user.likes.includes(id);
+  let image_public_id: IProduct["images"][0]["public_id"] =
+    images[0]?.public_id;
+  let isLiked: boolean = $user.likes.includes(id);
   let captionVisible = false;
 
   $: {
@@ -19,10 +23,10 @@
     ({ id, name, description, price, images, likes_count } = product);
     image_public_id = images[0]?.public_id;
   }
-  
+
   $: {
     // Reassign variables when $user changes or id changes
-    isLiked = $user.likes.includes(id); 
+    isLiked = $user.likes.includes(id);
   }
 
   function onTouchStart() {
@@ -34,9 +38,9 @@
   }
 </script>
 
-{#if image_public_id}
+{#if image_public_id && show_media}
   <div class="card">
-    <a href={`/product/${id}`}>
+    <a href={`/shop/${company_id}/product/${id}`}>
       <img
         on:touchstart={onTouchStart}
         on:touchend={onTouchEnd}

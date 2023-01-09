@@ -1,31 +1,9 @@
 <script lang="ts">
-  import { env } from "$env/dynamic/public";
-  import Logo from "./Logo.svelte";
-  import { productsStore } from "../stores/products";
-  import { onMount } from "svelte";
-  import type { IProduct } from "src/api/products";
+  import Logo from "../../../../../components/Logo.svelte";
+  import { dic } from "../../../../../stores/products";
 
-  export let id: IProduct["id"];
-
-  let loading = false;
-  let products = productsStore.dic
-  let product = $products[id];
-
-  async function fetchProduct() {
-    loading = true;
-
-    const response = await fetch(
-      `${env.PUBLIC_MOTION_MENU_API_ENDPOINT}/api/v1/product/${id}`
-    );
-
-    const json = await response.json();
-
-    product = json.data;
-
-    loading = false;
-  }
-
-  onMount(fetchProduct);
+  export let data;
+  let product = $dic[data.product_id];
 
   function goBack() {
     window.history.back();
@@ -80,7 +58,7 @@
   {/if}
 
   <div class="footer">
-    <button class="button" on:click={goBack}>Volver</button>
+    <button class="button" on:click={goBack}>Go back</button>
   </div>
 </div>
 

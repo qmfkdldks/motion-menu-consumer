@@ -4,7 +4,7 @@
 // API communication
 // Tracking logic
 
-import { productsStore } from "../stores/products";
+import { dic as products_dic } from "../stores/products";
 import {
   get_product_likes,
   create_product_like,
@@ -38,7 +38,7 @@ export const getProductLikes = async (company_id: CompanySlug) => {
 export const createProductLike = async (product_id: IProduct["id"]) => {
   try {
     const response = await create_product_like(product_id, user_distinct_id);
-    productsStore.dic.update((prev) => ({
+    products_dic.update((prev) => ({
       ...prev,
       [product_id]: response.data,
     }));
@@ -54,7 +54,7 @@ export const createProductLike = async (product_id: IProduct["id"]) => {
 export const removeProductLike = async (product_id: IProduct["id"]) => {
   try {
     const response = await remove_product_like(product_id, user_distinct_id);
-    productsStore.dic.update((prev) => ({
+    products_dic.update((prev) => ({
       ...prev,
       [product_id]: response.data,
     }));

@@ -1,5 +1,5 @@
 import { getCompany } from "../../../services/profile_service";
-import { getProducts } from "../../../services/products_service";
+import { loadAllProducts } from "../../../services/products_service";
 import { getProductLikes } from "../../../services/like_service";
 import type { CompanySlug } from "src/api/company";
 
@@ -11,8 +11,9 @@ interface IRouteParams {
 
 export async function load({ params }: IRouteParams) {
   let company_id = params.company_id;
+
   await getCompany(company_id);
-  await getProducts(company_id);
+  await loadAllProducts(company_id);
   await getProductLikes(company_id);
 
   return {

@@ -1,28 +1,20 @@
 <script lang="ts">
   import { _ } from "svelte-i18n";
   import Logo from "../../../components/Logo.svelte";
-  import { productsStore, type IGroupedProducts } from "../../../stores/products.js";
+  import {
+    dic as products_dic,
+    query,
+    ids,
+    grouped_by_tags,
+    filtered_ids,
+  } from "../../../stores/products.js";
   import { company } from "../../../stores/company.js";
   import Masonry from "../../../components/Masonry.svelte";
   import Card from "../../../components/Card.svelte";
-  import type { IProduct } from "src/api/products";
 
   // Fetch products data given id
   export let data;
-  let grouped: IGroupedProducts = {};
-  let filtered_ids: IProduct["id"][] = [];
-  let products = productsStore.dic;
-  let query = productsStore.query;
   let company_id = data.company_id;
-
-  productsStore.grouped_by_tags.subscribe((value) => {
-    grouped = value;
-  });
-
-  // User can filter products using query value
-  productsStore.filtered_ids.subscribe((value) => {
-    filtered_ids = value;
-  });
 
   $: ordered_tags = $company.tag_priority
     ? $company.tag_priority
@@ -31,7 +23,7 @@
         .filter((v, i, a) => a.indexOf(v) === i)
     : [];
 
-  $: unordered_tags = Object.keys(grouped).filter(
+  $: unordered_tags = Object.keys($grouped_by_tags).filter(
     (key) => !ordered_tags.includes(key)
   );
 
@@ -89,32 +81,28 @@
     gridGap={"10"}
     colWidth={"minmax(Min(50%, 225px), 1fr)"}
     items={$query.length > 1
-      ? Object.values(filtered_ids)
-      : Object.values(grouped).flatMap((x) => x)}
+      ? Object.values($filtered_ids)
+      : Object.values($grouped_by_tags).flatMap((x) => x)}
   >
     {#if $query.length > 1}
-      {#each Object.values(filtered_ids) as product_id}
-        <Card
-        product={$products[product_id]}	
-        />
+      {#each Object.values($filtered_ids) as product_id}
+        <Card {company_id} product={$products_dic[product_id]} show_media={false} />
       {/each}
     {:else}
       {#each all_tags as tag_name}
-        {#if grouped[tag_name]}
+        {#if $grouped_by_tags[tag_name]}
           <h1 class="tag">{tag_name}</h1>
-          {#each grouped[tag_name] as product_id}
-            <Card
-            product={$products[product_id]}	
-            />
+          {#each $grouped_by_tags[tag_name] as product_id}
+            <Card {company_id} product={$products_dic[product_id]} show_media={false} />
           {/each}
         {/if}
       {/each}
     {/if}
   </Masonry>
 
-  {#if Object.keys($products).length === 0}
+  <!-- {#if Object.keys($products_dic).length === 0}
     <div class="pagination">Loading...</div>
-  {/if}
+  {/if} -->
 </main>
 
 <style>

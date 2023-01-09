@@ -54,23 +54,23 @@ describe("Menu Page", () => {
       cy.intercept(
         {
           method: "GET",
-          url: "/api/v1/pro/products*",
+          url: "/api/v1/shop/products*",
         },
         testResponse
       ).as("get_products");
 
-      cy.visit("/shop/pro/menu");
+      cy.visit("/shop/shop");
     });
 
     it("render likes", () => {
       cy.wait("@get_products").then(() => {
-        cy.get(".likes > .likes-count").contains(testLikes);
+        cy.get(".like-container > .likes-count").contains(testLikes);
       });
     });
     it("render icon liked", () => {
       cy.wait("@get_products").then(() => {
-        cy.get(".likes > .icon").click();
-        cy.get(".likes > .icon").should("have.class", "liked");
+        cy.get(".like-container > .icon").last().click();
+        cy.get(".like-container > .icon").should("have.class", "liked");
       });
     });
   });
@@ -130,25 +130,25 @@ describe("Menu Page", () => {
       cy.intercept(
         {
           method: "GET",
-          url: "/api/v1/pro/products*",
+          url: "/api/v1/shop/products*",
         },
         testResponse
       ).as("get_products");
 
-      cy.visit("/shop/pro/menu");
+      cy.visit("/shop/shop");
     });
 
     it("render without likes", () => {
       cy.wait("@get_products").then(() => {
-        cy.get(".likes > .likes-count").should("not.exist");
+        cy.get(".like-container > .likes-count").should("not.exist");
       });
     });
   });
 
   context("Products list", () => {
     beforeEach(() => {
-      cy.intercept("GET", "/api/v1/pro/products*").as("get_products");
-      cy.visit("/shop/pro/menu");
+      cy.intercept("GET", "/api/v1/shop/products*").as("get_products");
+      cy.visit("/shop/shop");
     });
 
     it("like a product", () => {
@@ -159,8 +159,8 @@ describe("Menu Page", () => {
         const testProductLikes =
           $interception.response.body.data[productLikedID].likes_count;
 
-        cy.get(".likes > .icon").last().click();
-        cy.get(".likes > .likes-count")
+        cy.get(".like-container > .icon").last().click();
+        cy.get(".like-container > .likes-count")
           .last()
           .contains(testProductLikes + 1);
       });

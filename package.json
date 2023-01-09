@@ -8,7 +8,9 @@
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
-    "test:unit": "vitest"
+    "test:unit": "vitest",
+    "test:e2e": "cypress open",
+    "test:e2e:run": "cypress run"
   },
   "devDependencies": {
     "@sveltejs/adapter-auto": "next",
@@ -20,12 +22,14 @@
     "svelte-preprocess": "^4.10.7",
     "tslib": "^2.4.1",
     "typescript": "^4.9.3",
-    "vite": "^3.2.4",
+    "vite": "^4.0.3",
     "vitest": "^0.25.3"
   },
   "type": "module",
   "dependencies": {
+    "@auth0/auth0-spa-js": "^2.0.1",
     "axios": "^1.2.0",
+    "chart.js": "^4.1.1",
     "flagsmith": "^3.14.1",
     "mixpanel-browser": "^2.45.0",
     "svelte-chartjs": "^3.1.0",

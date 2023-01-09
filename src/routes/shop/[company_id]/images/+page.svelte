@@ -1,9 +1,11 @@
 <script lang="ts">
-  import { env } from "$env/dynamic/public";
-
   import { _ } from "svelte-i18n";
   import Logo from "../../../../components/Logo.svelte";
-  import { productsStore } from "../../../../stores/products.js";
+  import {
+    dic as products_dic,
+    ids_with_images,
+    ids_with_videos,
+  } from "../../../../stores/products.js";
   import { company } from "../../../../stores/company.js";
   import Masonry from "../../../../components/Masonry.svelte";
   import Card from "../../../../components/Card.svelte";
@@ -12,25 +14,6 @@
   // Fetch products data given shop company_id
   export let data;
   let company_id = data.company_id;
-
-  let list_ids: string[] = [];
-  let ids_with_images: string[] = [];
-  let ids_with_videos: string[] = [];
-  let loading = false;
-  let products = productsStore.dic;
-
-  productsStore.ids.subscribe((value) => {
-    list_ids = value;
-  });
-
-  productsStore.ids_with_images.subscribe((value) => {
-    ids_with_images = value;
-  });
-
-  productsStore.ids_with_videos.subscribe((value) => {
-    ids_with_videos = value;
-  });
-
 </script>
 
 <svelte:head>
@@ -67,7 +50,7 @@
     </div>
   </div>
 
-  {#if ids_with_images.length + ids_with_videos.length < 1}
+  {#if $ids_with_images.length + $ids_with_videos.length < 1}
     <div class="row no-image">
       <p>{$_("no_images")}</p>
       <a href={`/shop/${company_id}`}><h5>{$_("check_menu")}</h5></a>
@@ -78,31 +61,24 @@
     stretchFirst={false}
     gridGap={"10"}
     colWidth={"minmax(Min(50%, 225px), 1fr)"}
-    items={[...ids_with_videos, ...ids_with_images]}
+    items={[...$ids_with_videos, ...$ids_with_images]}
   >
-    {#each ids_with_videos as product_id}
+    {#each $ids_with_videos as product_id}
       <Video
-        id={$products[product_id].id}
-        name={$products[product_id].name}
-        price={$products[product_id].price}
-        video_public_id={$products[product_id].videos[0]?.public_id}
+        id={$products_dic[product_id].id}
+        name={$products_dic[product_id].name}
+        price={$products_dic[product_id].price}
+        video_public_id={$products_dic[product_id].videos[0]?.public_id}
       />
     {/each}
 
-    {#each ids_with_images as product_id}
-        <Card
-          product={$products[product_id]}
-        />
+    {#each $ids_with_images as product_id}
+      <Card {company_id} product={$products_dic[product_id]} show_media={true} />
     {/each}
   </Masonry>
 
-  {#if loading}
-    <div class="pagination">Loading...</div>
-  {/if}
-
   <div class="row center">
-    <a href={`/shop/${company_id}`} class="button">{$_("more_products")}</a
-    >
+    <a href={`/shop/${company_id}`} class="button">{$_("more_products")}</a>
   </div>
 </main>
 
