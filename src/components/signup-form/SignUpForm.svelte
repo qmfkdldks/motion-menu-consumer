@@ -2,6 +2,7 @@
   import { _ } from "svelte-i18n";
   import Button from "../button/Button.svelte";
   import LoadingSpinner from "../LoadingSpinner.svelte";
+  import { sign_up_schema as schema } from "../../lib/validation_schemas";
 
   export let handleSubmitCallback: (
     email: string,
@@ -15,16 +16,6 @@
   let password: string = "";
   let password_confirmation: string = "";
 
-  let error: {
-    email: boolean;
-    password: boolean;
-    password_confirmation: boolean;
-  } = {
-    email: false,
-    password: false,
-    password_confirmation: false,
-  };
-
   let error_message: {
     email: string;
     password: string;
@@ -35,54 +26,45 @@
     password_confirmation: "",
   };
 
-  const checkInput = {
-    //email validation
-    email: () => {
-      //if email is empty or invalid
-      if (!/^[a-zA-Z0-9-_.]+@[a-zA-Z0-9-_.]+\.[a-zA-Z0-9-_.]+$/.test(email)) {
-        error_message.email = $_(
-          `components.sign-up_form.input_error.email.valid`
-        );
-        error.email = true;
-        return;
+  let checkInput = {
+    email: async () => {
+      try {
+        await schema.validate({ email });
+        error_message.email = "";
+      } catch (error) {
+        error_message.email = $_(error.errors[0]);
       }
-      //if email is less than 5 characters or more than 100 characters
-      if (email.length < 5 || email.length > 100) {
-        error_message.email = $_(
-          `components.sign-up_form.input_error.email.length`
-        );
-        error.email = true;
-        return;
-      }
-      error.email = false;
-      error_message.email = "";
     },
-    //password validation
-    password: () => {
-      //if password is less than 5 characters or more than 100 characters
-      if (password.length < 5 || password.length > 100) {
-        error_message.password = $_(
-          `components.sign-up_form.input_error.password.length`
-        );
-        error.password = true;
-        return;
+    password: async () => {
+      try {
+        await schema.validate({ password });
+        error_message.password = "";
+      } catch (error) {
+        error_message.password = $_(error.errors[0]);
       }
-      error.password = false;
-      error_message.password = "";
     },
-    //password confirmation validation
-    password_confirmation: () => {
-      if (password !== password_confirmation) {
-        error_message.password_confirmation = $_(
-          `components.sign-up_form.input_error.password_confirmation`
-        );
-        error.password_confirmation = true;
-        return;
+    password_confirmation: async () => {
+      try {
+        await schema.validateAt("password_confirmation", {
+          password, // need to pass password to validate
+          password_confirmation,
+        });
+        error_message.password_confirmation = "";
+      } catch (error) {
+        console.log(error.errors);
+
+        error_message.password_confirmation = $_(error.errors[0]);
       }
-      error.password_confirmation = false;
-      error_message.password_confirmation = "";
     },
   };
+
+  async function checkAllInputs() {
+    await Promise.all([
+      checkInput.email(),
+      checkInput.password(),
+      checkInput.password_confirmation(),
+    ]);
+  }
 
   const handleInput = {
     email: (event: Event) => {
@@ -96,14 +78,10 @@
     },
   };
 
-  function handleSubmit() {
-    checkInput.email();
-    checkInput.password();
-    checkInput.password_confirmation();
+  async function handleSubmit() {
+    await checkAllInputs();
 
-    if (error.email || error.password || error.password_confirmation) {
-      return;
-    } else {
+    if (Object.values(error_message).every((error) => error === "")) {
       handleSubmitCallback(email, password, password_confirmation);
     }
   }
@@ -125,7 +103,7 @@
       on:input={handleInput.email}
       on:blur={checkInput.email}
     />
-    {#if error.email}
+    {#if error_message.email}
       <p class="error_message" data-testid="email-error-message">
         {error_message.email}
       </p>
@@ -145,7 +123,7 @@
       on:input={handleInput.password}
       on:blur={checkInput.password}
     />
-    {#if error.password}
+    {#if error_message.password}
       <p class="error_message" data-testid="password-error-message">
         {error_message.password}
       </p>
@@ -167,7 +145,7 @@
       on:input={handleInput.password_confirmation}
       on:blur={checkInput.password_confirmation}
     />
-    {#if error.password_confirmation}
+    {#if error_message.password_confirmation}
       <p
         class="error_message"
         data-testid="password-confirmation-error-message"

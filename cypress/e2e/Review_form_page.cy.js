@@ -5,7 +5,7 @@ import {
 import "../support/commands";
 
 describe("Review form Page", () => {
-  const TEST_COMPANY_ID = 50;
+  const TEST_COMPANY_ID = 201;
 
   const comment = "This is a test comment";
   const request_body = {

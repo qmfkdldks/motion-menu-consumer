@@ -19,7 +19,7 @@ describe("Landing Page", () => {
   context("Sign up form", () => {
     it("shows error messages when fields are empty", () => {
       cy.get("[data-testid=submit-button]").click();
-      cy.contains(invalid_email_message).should("be.visible");
+      cy.contains(length_email_message).should("be.visible");
       cy.contains(length_password_message).should("be.visible");
     });
 

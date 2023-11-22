@@ -2,6 +2,7 @@
   import { _ } from "svelte-i18n";
   import Button from "../button/Button.svelte";
   import type { CompanyCategory } from "../../stores/company";
+  import { profiling_schema as schema } from "../../lib/validation_schemas";
 
   export let handleSubmitCallback: (
     shop_name: string,
@@ -18,23 +19,15 @@
   let category_selected: CompanyCategory = "empty";
   let shop_name: string = "";
 
-  let error: boolean = false;
-  let error_message: string;
-  $: error_message = $_(`routes.shop.profiling.input_error.no_special`);
+  let error_message: string = "";
 
-  function checkInput() {
-    if (!/^[a-zA-Z0-9- ]*$/.test(shop_name)) {
-      error_message = $_(`routes.shop.profiling.input_error.no_special`);
-      error = true;
-      return;
+  async function checkInput() {
+    try {
+      await schema.validate({ shop_name });
+      error_message = "";
+    } catch (error) {
+      error_message = $_(error.errors[0]);
     }
-    if (shop_name.length < 3 || shop_name.length > 30) {
-      error_message = $_(`routes.shop.profiling.input_error.length`);
-      error = true;
-      return;
-    }
-    error = false;
-    error_message = "";
   }
 
   function handleInput(event: Event) {
@@ -44,7 +37,7 @@
   function handleSubmit() {
     checkInput();
 
-    if (error) {
+    if (error_message) {
       return;
     } else {
       handleSubmitCallback(shop_name, category_selected);
@@ -64,7 +57,7 @@
       on:input={handleInput}
       on:blur={checkInput}
     />
-    {#if error}
+    {#if error_message}
       <p class="error_message" data-testid="error-message">
         {error_message}
       </p>

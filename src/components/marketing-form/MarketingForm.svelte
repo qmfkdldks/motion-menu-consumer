@@ -1,8 +1,8 @@
 <script lang="ts">
   import { _ } from "svelte-i18n";
-  import { object, string } from "yup";
   import Button from "../button/Button.svelte";
   import LoadingSpinner from "../LoadingSpinner.svelte";
+  import { marketing_schema as schema } from "$lib/validation_schemas";
 
   // Accept callback from parent component
   export let submitCallback: (email: string) => void;
@@ -11,13 +11,6 @@
 
   let email: string = "";
   let error_messages: string[] = [];
-
-  // Create validation schema
-  let schema = object({
-    email: string()
-      .email($_("components.marketing_form.email.invalid"))
-      .required($_("components.marketing_form.email.required")),
-  });
 
   const handleInput = {
     email: (event: Event) => {
@@ -34,7 +27,7 @@
       submitCallback(email);
     } catch (e) {
       console.info(e.errors);
-      error_messages = e.errors;
+      error_messages = e.errors.map((error: string) => $_(error));
     } finally {
       loading_submit = false;
     }

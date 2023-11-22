@@ -7,6 +7,7 @@
   import { is_authenticated, user } from "../../stores/user_store";
   import Button from "../../components/button/Button.svelte";
   import LoadingSpinner from "../../components/LoadingSpinner.svelte";
+  import { review_schema as schema } from "../../lib/validation_schemas";
 
   type ReviewPage = "index" | "form";
 
@@ -15,7 +16,6 @@
     authenticated: boolean;
   }) => void;
 
-  export let COMMENT_MIN_LENGTH: number = 3;
   export let page: ReviewPage = "index";
   export let height: { default: number; desktop?: number } = {
     default: 200,
@@ -25,6 +25,8 @@
   let company_id: ICompany["id"] = $company.id;
   let comment: string = "";
   let error_occurred: boolean = false;
+
+  // Create validation schema
 
   const handleInput = () => (event: Event) => {
     comment = (event.target as HTMLInputElement).value;
@@ -41,7 +43,8 @@
       }
     };
 
-    if (comment.length > COMMENT_MIN_LENGTH) {
+    try {
+      await schema.validate({ comment });
       if ($is_authenticated) {
         await sendReview();
         trackSubmitForm({ authenticated: true });
@@ -50,8 +53,8 @@
         await sendReview();
         trackSubmitForm({ authenticated: false });
       }
-    } else {
-      error_occurred = true; //if comment is too short show error message
+    } catch (error) {
+      error_occurred = true;
     }
   };
 </script>
